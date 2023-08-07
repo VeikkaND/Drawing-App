@@ -1,9 +1,7 @@
-import { io } from "socket.io-client"
 import { useNavigate } from "react-router-dom"
+import socket from "../socket"
 
 const Home = () => {
-    // TODO move to use redux vvv
-    const socket = io("http://localhost:3001/", {transports: ["websocket"]})
     const navigate = useNavigate()
 
     socket.on(404, (msg) => {
@@ -11,7 +9,6 @@ const Home = () => {
     })
     socket.on("join", (room) => {
         navigate(`/${room}`)
-        // TODO update users -state in room
     })
 
     const handleCreate = () => {
@@ -36,7 +33,6 @@ const Home = () => {
                 <button name="join" type="submit">join room</button>
                 <input name="room"></input>
             </form>
-            
         </div>
     )
 }

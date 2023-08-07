@@ -1,9 +1,15 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
+import socket from "../socket"
 
 const Room = () => {
     const {room} = useParams()
     const [users, setUsers] = useState([room])
+    // todo fix name disappearing when refreshing
+
+    socket.on("reloadUsers", (users) => {
+        setUsers(users)
+    })
 
     return(
         <div>
