@@ -40,4 +40,17 @@ io.on("connection", (socket) => {
             console.log("room not found", room)
         }
     })
+    socket.on("draw", (info) => {
+        const rooms = io.sockets.adapter.rooms
+        if(rooms.has(info.room)) {
+            socket.to(info.room).emit("draw", {
+                lineToX: info.lineToX, 
+                lineToY: info.lineToY,
+                lineWidth: info.lineWidth
+            })
+        }
+    })
+    socket.on("stop", (room) => {
+        socket.to(room).emit("stop")
+    })
 })

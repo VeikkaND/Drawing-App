@@ -1,8 +1,31 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import socket from "../socket"
 
-const DrawingCanvas = () => {
+const DrawingCanvas = ({room}) => {
     const [canvasState, setCanvasState] = useState(null)
+    const [update, setUpdate] = useState(true)
+    const canvasRef = useRef(null)
+
+    useEffect(() => {
+        setUpdate(false)
+    }, [])
+
+    useEffect(() => {
+        // TODO fix drawing not sohwing up after going back to previous tab
+        socket.on("draw", (info) => {
+            const ctx = canvasRef.current.getContext("2d")
     
+            ctx.lineWidth = info.lineWidth
+            ctx.lineTo(info.lineToX, info.lineToY)
+            ctx.stroke()
+        })
+        socket.on("stop", () => {
+            const ctx = canvasRef.current.getContext("2d")
+
+            ctx.stroke()
+            ctx.beginPath()
+        })
+    }, [update])
 
     let painting = false
     let lineWidth = 4
@@ -21,10 +44,18 @@ const DrawingCanvas = () => {
             const ctx = canvas.getContext("2d")
 
             ctx.lineWidth = lineWidth
+            const lineToX = event.clientX - canvas.offsetLeft
+            const lineToY = event.clientY - canvas.offsetTop
 
-            ctx.lineTo(event.clientX - canvas.offsetLeft, 
-                event.clientY - canvas.offsetTop)
+            ctx.lineTo(lineToX, lineToY)
             ctx.stroke()
+            
+            socket.emit("draw", {
+                room: room, 
+                lineToX: lineToX, 
+                lineToY: lineToY,
+                lineWidth: lineWidth
+            })
         }
     }
 
@@ -35,6 +66,8 @@ const DrawingCanvas = () => {
 
         ctx.stroke()
         ctx.beginPath()
+
+        socket.emit("stop", room)
     }
 
     const canvasStyle = {
@@ -43,11 +76,12 @@ const DrawingCanvas = () => {
 
     return (
         <div>
-            <canvas onMouseDown={startDraw} 
+            <canvas className="canvas"
+                onMouseDown={startDraw} 
                 onMouseMove={draw} 
                 onMouseUp={stopDraw}
-                style={canvasStyle}>
-
+                style={canvasStyle}
+                ref={canvasRef}>
             </canvas>
         </div>
     )

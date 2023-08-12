@@ -16,7 +16,7 @@ const Room = () => {
         <div>
             <h1>room {room}</h1>
             current users: {users.map(user => <p key={user}>{user}</p>)}
-            <DrawingCanvas />
+            <DrawingCanvas room={room}/>
         </div>
     )
 }
